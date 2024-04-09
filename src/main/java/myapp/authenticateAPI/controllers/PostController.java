@@ -20,12 +20,12 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/posts")
-    public ResponseEntity<List<Post>> getAllPosts() {
+    public ResponseEntity<List<Post>> findAllPosts() {
         return ResponseEntity.ok(postService.findAllPosts());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable String id) {
+    public ResponseEntity<Post> findByIdPost(@PathVariable String id) {
         return ResponseEntity.ok(postService.findById(id));
     }
 

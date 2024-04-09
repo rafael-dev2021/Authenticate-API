@@ -36,19 +36,24 @@ public class UserService {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new NotAuthenticatedException();
         }
+
         // Get the authenticated user's ID
         String authenticatedUserId = ((User) authentication.getPrincipal()).getId();
 
-        // Check if the authenticated user is trying to update their own information
-        if (!id.equals(authenticatedUserId)) {
-            // If not, throw access denied exception
+        // Check if the authenticated user is an admin
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        // If the authenticated user is not an admin and is not deleting their own account
+        if (!isAdmin && !id.equals(authenticatedUserId)) {
             throw new DomainAccessDeniedException();
         }
 
         // Delete the user
-        findById(id);
+        findById(id); // This line doesn't seem necessary
         userRepository.deleteById(id);
     }
+
 
 
     public ResponseEntity<Void> processUpdateUser(String id, User user, Authentication authentication) {
@@ -62,7 +67,7 @@ public class UserService {
 
         // Check if the authenticated user is trying to update their own information
         if (!id.equals(authenticatedUserId)) {
-            // If not, throw an access denied exception
+            // If not, throw access denied exception
             throw new DomainAccessDeniedException();
         }
 
