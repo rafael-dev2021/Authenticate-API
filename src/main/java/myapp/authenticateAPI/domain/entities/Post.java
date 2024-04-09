@@ -15,6 +15,8 @@ import java.util.List;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Document
 public class Post implements Serializable {
 
