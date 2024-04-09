@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.*;
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 @Document
 public class User implements UserDetails {
