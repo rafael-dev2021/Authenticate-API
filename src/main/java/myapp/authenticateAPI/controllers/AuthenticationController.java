@@ -19,12 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
-    private final TokenService tokenService;
     private final AccountService accountService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthenticationDTO authDto) {
-        return accountService.processLogin(authDto, authenticationManager, tokenService);
+        return accountService.processLogin(authDto, authenticationManager);
     }
 
     @PostMapping("/register")
