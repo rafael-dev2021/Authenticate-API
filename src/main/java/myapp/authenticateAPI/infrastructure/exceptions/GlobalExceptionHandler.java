@@ -17,6 +17,20 @@ import java.util.Map;
 
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<Object> handleCategoryNotFoundException(CategoryNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", ex.getMessage()));
+    }
+    @ExceptionHandler(TagNotFoundException.class)
+    public ResponseEntity<Object> handleTagNotFoundException(TagNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", ex.getMessage()));
+    }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<Object> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Collections.singletonMap("message", ex.getMessage()));
@@ -38,10 +52,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Object> handleUserNotFoundException(PostNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", ex.getMessage()));
-    }
+
 
     @ExceptionHandler(CustomAuthenticationException.class)
     public ResponseEntity<Object> handleCustomAuthenticationException(CustomAuthenticationException ex) {
