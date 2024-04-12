@@ -17,6 +17,10 @@ import java.util.Map;
 
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<Object> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Collections.singletonMap("message", ex.getMessage()));
+    }
 
     @ExceptionHandler(NotAuthenticatedException.class)
     public ResponseEntity<Object> handleNotAuthenticatedException(NotAuthenticatedException ex) {
