@@ -3,8 +3,7 @@ package myapp.authenticateAPI.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import myapp.authenticateAPI.dtos.AuthenticationDTO;
-import myapp.authenticateAPI.dtos.RegisterDTO;
-import myapp.authenticateAPI.infrastructure.security.TokenService;
+import myapp.authenticateAPI.dtos.UserDTO;
 import myapp.authenticateAPI.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +26,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterDTO registerDto) {
-        return accountService.processRegister(registerDto);
+    public ResponseEntity<?> register(@RequestBody @Valid UserDTO userDto) {
+        return accountService.processRegister(userDto);
     }
 }
