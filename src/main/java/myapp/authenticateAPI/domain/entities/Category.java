@@ -1,5 +1,6 @@
 package myapp.authenticateAPI.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,7 +29,7 @@ public class Category implements Serializable {
     private String name;
     private String slug;
 
-    @DBRef(lazy = true)
+    @DBRef()
     private List<Post> posts = new ArrayList<>();
 
 
