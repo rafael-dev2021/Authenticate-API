@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import myapp.authenticateAPI.domain.entities.Post;
 import myapp.authenticateAPI.domain.entities.User;
+import myapp.authenticateAPI.dtos.UserDTO;
 import myapp.authenticateAPI.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,7 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateUser(
             @PathVariable String id,
-            @RequestBody @Valid User user,
+            @RequestBody @Valid UserDTO user,
             Authentication authentication
     ) {
         return userService.processUpdateUser(id, user, authentication);
