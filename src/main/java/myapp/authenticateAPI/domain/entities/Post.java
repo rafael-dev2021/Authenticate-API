@@ -26,35 +26,46 @@ public class Post implements Serializable {
     @Id
     private String id;
 
-
     @NotBlank(message = "Title is required.")
     @Size(min = 5, max = 30, message = "Title must be between 5 and 30 characters.")
     private String title;
 
+    private String summary;
+
     @NotBlank(message = "Body is required.")
     @Size(min = 5, max = 30, message = "Body must be between 5 and 30 characters.")
     private String body;
-    private LocalDateTime date;
+    private String slug;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @DBRef(lazy = true)
     @JsonIgnore
     private User user;
 
-    private AuthorDTO author;
+    private List<Category> categories = new ArrayList<>();
+    private List<Tag> tags = new ArrayList<>();
 
-    public Post(String title, String body, LocalDateTime date, User user) {
-        this.title = title;
-        this.body = body;
-        this.date = date;
-        this.user = user;
-        this.author = new AuthorDTO(user.getName(), user.getLastName());
-    }
-
+    private AuthorDTO authorDTO;
     private List<Comment> comments = new ArrayList<>();
 
-    public Post(String title, String body, LocalDateTime date) {
+
+    public Post(String title, String summary, String body, String slug, LocalDateTime createdAt, User user) {
         this.title = title;
+        this.summary = summary;
         this.body = body;
-        this.date = date;
+        this.slug = slug;
+        this.createdAt = createdAt;
+        this.user = user;
+        this.authorDTO = new AuthorDTO(user.getName(), user.getLastName());
+    }
+
+
+    public void UpdatedPost(String title, String summary, String body, String slug, LocalDateTime updatedAt) {
+        this.title = title;
+        this.summary = summary;
+        this.body = body;
+        this.slug = slug;
+        this.updatedAt = updatedAt;
     }
 }
