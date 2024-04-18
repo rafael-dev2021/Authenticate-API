@@ -20,9 +20,4 @@ public class HelperValidateUser {
         }
         return (User) authentication.getPrincipal();
     }
-
-    public boolean isAdmin(Authentication authentication) {
-        return authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-    }
 }
