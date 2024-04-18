@@ -6,12 +6,10 @@ import myapp.authenticateAPI.domain.entities.Post;
 import myapp.authenticateAPI.domain.entities.Tag;
 import myapp.authenticateAPI.domain.entities.User;
 import myapp.authenticateAPI.dtos.AuthorDTO;
+import myapp.authenticateAPI.dtos.PostDTO;
 import myapp.authenticateAPI.infrastructure.exceptions.CategoryNotFoundException;
 import myapp.authenticateAPI.infrastructure.exceptions.TagNotFoundException;
-import myapp.authenticateAPI.repository.CategoryRepository;
-import myapp.authenticateAPI.repository.PostRepository;
-import myapp.authenticateAPI.repository.TagRepository;
-import myapp.authenticateAPI.repository.UserRepository;
+import myapp.authenticateAPI.repository.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -28,9 +26,15 @@ public class HelperComponentCreatePost {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
+    //private final CommentRepository commentRepository;
 
 
-    public Post helperCreateNewPost(Post post, User currentUser) {
+    public Post helperCreateNewPost(PostDTO postDTO, User currentUser) {
+        Post post = new Post();
+        post.setTitle(postDTO.title());
+        post.setSummary(postDTO.summary());
+        post.setBody(postDTO.body());
+        post.setSlug(postDTO.slug());
         post.setCreatedAt(LocalDateTime.now());
 
         AuthorDTO authorDTO = new AuthorDTO(currentUser.getName(), currentUser.getLastName());
@@ -38,13 +42,19 @@ public class HelperComponentCreatePost {
 
         post.setUser(currentUser);
 
-        List<Category> categories  = loadCategories(post.getCategories());
-        List<Tag> tags = loadTags(post.getTags());
+        List<Category> categories = loadCategories(postDTO.categories());
+        List<Tag> tags = loadTags(postDTO.tags());
+        //     List<Comment> comments = loadComments(postDTO.comments());
 
         post.setCategories(categories);
         post.setTags(tags);
+        //   post.setComments(comments);
 
-        Post createdPost = postRepository.insert(post);
+        Post createdPost = postRepository.save(post);
+
+        for (Category category : categories) {
+            incrementCategoryPostCount(category.getId(), createdPost);
+        }
 
         currentUser.getPosts().add(createdPost);
         userRepository.save(currentUser);
@@ -52,27 +62,54 @@ public class HelperComponentCreatePost {
         return createdPost;
     }
 
+
     public URI helperBuildUserUri(Post post) {
         return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(post.getId()).toUri();
     }
+    public void incrementCategoryPostCount(String categoryId, Post post) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+        category.setPostCount(category.getPostCount() + 1);
+        category.getPosts().add(post);
+        categoryRepository.save(category);
+    }
 
-    private List<Category> loadCategories(List<Category> categories){
+    public void decrementCategoryPostCount(String categoryId, String postId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+        category.setPostCount(category.getPostCount() - 1);
+        category.getPosts().removeIf(post -> post.getId().equals(postId));
+        categoryRepository.save(category);
+    }
+
+
+    private List<Category> loadCategories(List<Category> categories) {
         List<Category> loadedCategories = new ArrayList<>();
-        for(Category category : categories){
-            Category loadedCategory =categoryRepository.findById(category.getId())
+        for (Category category : categories) {
+            Category loadedCategory = categoryRepository.findById(category.getId())
                     .orElseThrow(() -> new CategoryNotFoundException(category.getId()));
             loadedCategories.add(loadedCategory);
         }
         return loadedCategories;
     }
 
-    private List<Tag> loadTags(List<Tag> tags){
+    private List<Tag> loadTags(List<Tag> tags) {
         List<Tag> loadedTags = new ArrayList<>();
-        for(Tag tag : tags){
-            Tag loadedTag =tagRepository.findById(tag.getId())
+        for (Tag tag : tags) {
+            Tag loadedTag = tagRepository.findById(tag.getId())
                     .orElseThrow(() -> new TagNotFoundException(tag.getId()));
             loadedTags.add(loadedTag);
         }
         return loadedTags;
     }
+
+    //   private List<Comment> loadComments(List<Comment> commentList) {
+    //        List<Comment> loadedComments = new ArrayList<>();
+    //        for(Comment comment : commentList){
+    //            Comment loadedComment = commentRepository.findById(comment.getId())
+    //                    .orElseThrow(() -> new TagNotFoundException(comment.getId()));
+    //            loadedComments.add(loadedComment);
+    //        }
+    //        return loadedComments;
+    //    }
 }

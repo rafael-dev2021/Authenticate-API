@@ -107,6 +107,26 @@ public class Instantiation implements CommandLineRunner {
         post2.getComments().add(comment2);
         postRepository.saveAll(Arrays.asList(post1, post2));
 
+        // Para cada post, adicione o post à lista de posts das categorias correspondentes
+        for (Post post : Arrays.asList(post1, post2)) {
+            for (Category category : post.getCategories()) {
+                category.getPosts().add(post);
+            }
+        }
+
+        // Salve as categorias atualizadas no repositório
+        categoryRepository.saveAll(Arrays.asList(category1, category2));
+
+        for (Post post : Arrays.asList(post1, post2)) {
+            for (Tag tag : post.getTags()) {
+                tag.getPosts().add(post);
+            }
+        }
+
+        // Salvar as tags atualizadas no repositório
+        tagRepository.saveAll(Arrays.asList(tag1, tag2));
+
+
         // Atualizar a lista de posts dos usuários
         admin.getPosts().add(post1);
         user.getPosts().add(post2);

@@ -29,7 +29,8 @@ public class Tag implements Serializable {
     private String name;
     private String slug;
 
-    @DBRef()
+    @DBRef(lazy = true)
+    @JsonIgnore
     private List<Post> posts = new ArrayList<>();
 
     public Tag(String name, String slug){

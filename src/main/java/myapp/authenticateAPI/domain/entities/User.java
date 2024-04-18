@@ -3,12 +3,15 @@ package myapp.authenticateAPI.domain.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.*;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -32,15 +35,22 @@ public class User implements UserDetails {
 
     private String password;
 
+    private UserRole role;
+
     private boolean isActive;
-    private UserRole role = UserRole.USER;
+    private int failedLoginAttempts = 0;
+    private LocalDateTime lockExpirationTime;
 
     @DBRef(lazy = true)
     @JsonIgnore
     private List<Post> posts = new ArrayList<>();
 
+    @JsonIgnore
+    @Transient
+    private int postCount;
 
-    public User(String name, String lastName,String phoneNumber, String bio, String email, String password, boolean isActive, UserRole role) {
+
+    public User(String name, String lastName, String phoneNumber, String bio, String email, String password, boolean isActive, UserRole role) {
         this.name = name;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
@@ -51,18 +61,10 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public User(String name, String lastName,String phoneNumber, String email, String password, boolean isActive) {
-        this.name = name;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.password = password;
-        this.isActive = isActive;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.role == UserRole.ADMIN) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        if (this.role == UserRole.ADMIN) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
         else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
@@ -83,7 +85,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return lockExpirationTime == null || lockExpirationTime.isBefore(LocalDateTime.now());
     }
 
     @Override
@@ -93,6 +95,11 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isActive;
+    }
+
+    public void lockAccountForHours() {
+        lockExpirationTime = LocalDateTime.now().plusHours(2);
+        isActive = false;
     }
 }

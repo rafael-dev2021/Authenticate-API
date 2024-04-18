@@ -3,6 +3,7 @@ package myapp.authenticateAPI.service.helpers.post;
 import lombok.RequiredArgsConstructor;
 import myapp.authenticateAPI.domain.entities.Post;
 import myapp.authenticateAPI.domain.entities.User;
+import myapp.authenticateAPI.dtos.PostDTO;
 import myapp.authenticateAPI.infrastructure.exceptions.DomainAccessDeniedException;
 import myapp.authenticateAPI.infrastructure.exceptions.PostNotFoundException;
 import myapp.authenticateAPI.repository.PostRepository;
@@ -16,17 +17,11 @@ public class HelperComponentPostUpdate {
 
     private final PostRepository postRepository;
 
-    public void helperUpdate(String id, Post updatedPost) {
+    public void helperUpdate(String id, PostDTO updatedPostDto) {
         Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));
 
-        helperUpdateTitle(existingPost, updatedPost.getTitle());
-        helperUpdateSummary(existingPost,updatedPost.getSummary());
-        helperUpdateBody(existingPost, updatedPost.getBody());
-        helperUpdateSlug(existingPost, updatedPost.getSlug());
-
-        existingPost.setUpdatedAt(LocalDateTime.now());
-
+        updatePostData(existingPost, updatedPostDto);
         postRepository.save(existingPost);
     }
 
@@ -36,13 +31,12 @@ public class HelperComponentPostUpdate {
         }
     }
 
-    public void helperUpdatedPost(Post post) {
-        post.UpdatedPost(
-                post.getTitle(),
-                post.getSummary(),
-                post.getBody(),
-                post.getSlug(),
-                LocalDateTime.now());
+    private void updatePostData(Post existingPost, PostDTO updatedPostDto) {
+        helperUpdateTitle(existingPost, updatedPostDto.title());
+        helperUpdateSummary(existingPost,updatedPostDto.summary());
+        helperUpdateBody(existingPost, updatedPostDto.body());
+        helperUpdateSlug(existingPost, updatedPostDto.slug());
+        existingPost.setUpdatedAt(LocalDateTime.now());
     }
 
     private void helperUpdateTitle(Post existingPost, String newTitle) {

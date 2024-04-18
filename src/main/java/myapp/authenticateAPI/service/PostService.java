@@ -1,12 +1,18 @@
 package myapp.authenticateAPI.service;
 
 import lombok.RequiredArgsConstructor;
+import myapp.authenticateAPI.domain.entities.Category;
 import myapp.authenticateAPI.domain.entities.Post;
 import myapp.authenticateAPI.domain.entities.User;
+import myapp.authenticateAPI.dtos.PostDTO;
+import myapp.authenticateAPI.infrastructure.exceptions.CategoryNotFoundException;
 import myapp.authenticateAPI.infrastructure.exceptions.PostNotFoundException;
+import myapp.authenticateAPI.repository.CategoryRepository;
 import myapp.authenticateAPI.repository.PostRepository;
-import myapp.authenticateAPI.service.helpers.post.*;
 import myapp.authenticateAPI.service.helpers.HelperValidateUser;
+import myapp.authenticateAPI.service.helpers.post.HelperComponentCreatePost;
+import myapp.authenticateAPI.service.helpers.post.HelperComponentPostDelete;
+import myapp.authenticateAPI.service.helpers.post.HelperComponentPostUpdate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -25,6 +31,8 @@ public class PostService {
     private final HelperComponentPostUpdate helperComponentPostUpdate;
     private final HelperComponentPostDelete helperComponentPostDelete;
 
+
+
     public List<Post> findAllPosts() {
         return postRepository.findAll();
     }
@@ -34,11 +42,11 @@ public class PostService {
         return post.orElseThrow(() -> new PostNotFoundException(id));
     }
 
-    public ResponseEntity<Post> processCreatePost(Post post, Authentication authentication) {
+    public ResponseEntity<Post> processCreatePost(PostDTO postDTO, Authentication authentication) {
         User currentUser = helperValidateUser.getCurrentUser(authentication);
         helperValidateUser.validateCurrentUser(currentUser);
 
-        Post createdPost = helperComponentCreatePost.helperCreateNewPost(post, currentUser);
+        Post createdPost = helperComponentCreatePost.helperCreateNewPost(postDTO, currentUser);
 
         URI uri = helperComponentCreatePost.helperBuildUserUri(createdPost);
 
@@ -46,22 +54,29 @@ public class PostService {
     }
 
 
-    public ResponseEntity<Post> processUpdatePost(String id, Post updatedpost, User currentUser) {
+    public ResponseEntity<Post> processUpdatePost(String id, PostDTO updatedPostDto, User currentUser) {
         helperValidateUser.validateCurrentUser(currentUser);
+
         Post existingPost = findById(id);
+
         helperComponentPostUpdate.helperValidateAuthorship(existingPost, currentUser);
 
-        helperComponentPostUpdate.helperUpdatedPost(updatedpost);
-        updatedpost.setId(id);
-        helperComponentPostUpdate.helperUpdate(id, updatedpost);
+        helperComponentPostUpdate.helperUpdate(id, updatedPostDto);
 
         return ResponseEntity.noContent().build();
     }
+
 
     public void deletePost(String id, Authentication authentication) {
         User currentUser = helperValidateUser.getCurrentUser(authentication);
         Post existingPost = findById(id);
         helperComponentPostDelete.helperValidatePostDeletion(existingPost, currentUser);
+
+        for (Category category : existingPost.getCategories()) {
+            helperComponentCreatePost.decrementCategoryPostCount(category.getId(), id);
+        }
+
         postRepository.deleteById(id);
+        helperComponentPostDelete.helperDecrementPostCount(currentUser);
     }
 }
