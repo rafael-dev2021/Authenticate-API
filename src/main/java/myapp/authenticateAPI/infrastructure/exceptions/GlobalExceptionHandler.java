@@ -17,6 +17,12 @@ import java.util.Map;
 
 public class GlobalExceptionHandler {
 
+
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<Object> handleAccountLockedException(AccountLockedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.singletonMap("message", ex.getMessage()));
+    }
+
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<Object> handleCategoryNotFoundException(CategoryNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", ex.getMessage()));
@@ -26,6 +32,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", ex.getMessage()));
     }
+
     @ExceptionHandler(TagNotFoundException.class)
     public ResponseEntity<Object> handleTagNotFoundException(TagNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", ex.getMessage()));
@@ -47,16 +54,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DomainAccessDeniedException.class)
-    public ResponseEntity<Object> handleAccessDeniedException(DomainAccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.singletonMap("message", ex.getMessage()));
+    public ResponseEntity<Object> handleDomainAccessDeniedException(DomainAccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.singletonMap("error", ex.getMessage()));
     }
-
-
 
 
     @ExceptionHandler(CustomAuthenticationException.class)
     public ResponseEntity<Object> handleCustomAuthenticationException(CustomAuthenticationException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
