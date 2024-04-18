@@ -2,13 +2,11 @@ package myapp.authenticateAPI.service;
 
 import lombok.RequiredArgsConstructor;
 import myapp.authenticateAPI.domain.entities.Category;
+import myapp.authenticateAPI.domain.entities.Post;
 import myapp.authenticateAPI.infrastructure.exceptions.CategoryNotFoundException;
-import myapp.authenticateAPI.infrastructure.exceptions.DomainAccessDeniedException;
 import myapp.authenticateAPI.repository.CategoryRepository;
-import myapp.authenticateAPI.service.helpers.HelperValidateUser;
 import myapp.authenticateAPI.service.helpers.category.HelperComponentUpdateCategory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -21,9 +19,13 @@ import java.util.Optional;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final HelperValidateUser helperValidateUser;
     private final HelperComponentUpdateCategory helperComponentUpdateCategory;
 
+    public List<Post> findPostsByCategoryId(String categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+        return category.getPosts();
+    }
     public List<Category> findAllCategories() {
         return categoryRepository.findAll();
     }
@@ -33,20 +35,16 @@ public class CategoryService {
         return category.orElseThrow(() -> new CategoryNotFoundException(id));
     }
 
-    public ResponseEntity<Category> processCreateCategory(Category category, Authentication authentication) {
-        if (!helperValidateUser.isAdmin(authentication)) {
-            throw new DomainAccessDeniedException();
-        }
-
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(category.getId()).toUri();
+    public ResponseEntity<Category> processCreateCategory(Category category) {
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(category.getId())
+                .toUri();
         return ResponseEntity.created(uri).body(categoryRepository.save(category));
     }
 
-    public ResponseEntity<Category> processUpdateCategory(String id, Category updatedCategory, Authentication authentication) {
-        if (!helperValidateUser.isAdmin(authentication)) {
-            throw new DomainAccessDeniedException();
-        }
-
+    public ResponseEntity<Category> processUpdateCategory(String id, Category updatedCategory) {
         helperComponentUpdateCategory.helperUpdatedCategory(updatedCategory);
         updatedCategory.setId(id);
         helperComponentUpdateCategory.helperUpdate(id, updatedCategory);
@@ -54,13 +52,8 @@ public class CategoryService {
         return ResponseEntity.noContent().build();
     }
 
-    public void deleteCategory(String id, Authentication authentication) {
-        if (!helperValidateUser.isAdmin(authentication)) {
-            throw new DomainAccessDeniedException();
-        }
-
+    public void deleteCategory(String id) {
         Category existingCategory = findById(id);
         categoryRepository.delete(existingCategory);
     }
-
 }
