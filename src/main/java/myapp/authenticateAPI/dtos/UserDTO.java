@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import myapp.authenticateAPI.domain.entities.UserRole;
 
 public record UserDTO(
         @NotBlank(message = "Name is required.")
@@ -15,10 +14,11 @@ public record UserDTO(
         String lastName,
 
         @NotBlank(message = "Phone number is required.")
+        @Size(max = 11, message = "Phone number must be less than 11 characters.")
         @Pattern(regexp = "^[0-9]+$", message = "Phone number must contain only digits.")
         String phoneNumber,
 
-        @Size(max = 30, message = "Bio must be less than 30 characters.")
+        @Size(max = 100, message = "Bio must be less than 100 characters.")
         String bio,
         @NotBlank(message = "Email is required.")
         @Email(message = "Invalid email format.")
@@ -28,7 +28,6 @@ public record UserDTO(
         @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+).{10,30}$",
                 message = "Password must be strong and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")
         @Size(min = 10, max = 30, message = "Password must be between 10 and 30 characters.")
-        String password,
-        UserRole role
+        String password
 ) {
 }
