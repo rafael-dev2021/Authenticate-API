@@ -32,6 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-# Ignorar arquivos de configuração
-application.properties
-application.yml
+# Ignore configuration files
+src/main/resources/application.properties
+src/main/resources/application.yml
+
